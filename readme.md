@@ -1,5 +1,5 @@
 # ANRITSU MS2090A Automatic Measurement System
-### Version: 0.1
+### Version: 1.0.0
 
 ## Introduction
 This is a Python library for controlling the ANRITSU MS2090A. The library is based on the [pyvisa](https://pyvisa.readthedocs.io/en/stable/) library and uses the [pyvisa-py](https://pyvisa-py.readthedocs.io/en/latest/) backend.
