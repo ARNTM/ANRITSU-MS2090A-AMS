@@ -14,10 +14,16 @@ After execute this command, the programm will be entered in the configuration mo
 
 ![](img/config_steps.png)
 
-If you can create custom config files, you can use the flag -f to choose the file you want to use.
+If you can create custom config files, you can use the flag `-f` to choose the file you want to use.
 
 ```bash
 python anritsu-ms2090a-ams -f config_file
+```
+
+If you want skip the configuration mode, you can use the flag `--skipSetup` to skip that. To do that, you must have a config file.
+
+```bash
+python anritsu-ms2090a-ams -f config_file --skipSetup
 ```
 
 After the configuration, the programm will be entered in the measurement mode where you can choose the type of measurement you want to do.
