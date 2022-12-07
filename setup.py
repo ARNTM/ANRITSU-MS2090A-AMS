@@ -3,7 +3,7 @@ from setuptools import setup, Extension
 
 setup(
     name='anritsu_ms2090a_ams',
-    version='0.0.5',
+    version='1.0.0',
     description='ANRITSU MS2090A Automatic Measurement System',
     package_dir={'': 'src'},
     install_requires=[
