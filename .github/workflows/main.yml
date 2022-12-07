@@ -24,10 +24,10 @@ jobs:
 
       - name: ✨ Setup Package
         run: |
-          python setup.py bdist_wheel
+          python setup.py bdist_wheel 
       - name: 🛠️ Install Twine
         run: |
           pip install twine
       - name: 🔑 Upload Package to PyPi
         run: |
-          echo "Hola"
+          twine upload dist/* -u ${{ secrets.USER }} -p ${{ secrets.TOKEN }}
