@@ -6,7 +6,7 @@ This is a Python library for controlling the ANRITSU MS2090A Automatic Measureme
 
 ## Usage
 The library can be used to control the MS2090A from Python. 
-```python
+```bash
 python anritsu-ms2090a-ams
 ```
 
@@ -16,7 +16,7 @@ After execute this command, the programm will be entered in the configuration mo
 
 If you can create custom config files, you can use the flag -f to choose the file you want to use.
 
-```python
+```bash
 python anritsu-ms2090a-ams -f config_file
 ```
 
