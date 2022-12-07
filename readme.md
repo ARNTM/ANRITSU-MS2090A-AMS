@@ -1,4 +1,7 @@
 # ANRITSU MS2090A Automatic Measurement System
+
+[![PyPi](https://github.com/aruznieto/ANRITSU-MS2090A-AMS/actions/workflows/main.yml/badge.svg)](https://github.com/aruznieto/ANRITSU-MS2090A-AMS/actions/workflows/main.yml)
+
 ### Version: 1.0.0
 
 ## Introduction
