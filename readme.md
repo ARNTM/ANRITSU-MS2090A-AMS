@@ -25,7 +25,7 @@ anritsu_ms2090a_ams
 
 After execute this command, the programm will be entered in the configuration mode where you can introduce the parameters for measurements, it will be saved on a file called `"anritsu_config"`. Text between [] are the default values.
 
-![](img/config_steps.png)
+![](doc_img/config_steps.png)
 
 If you can create custom config files, you can use the flag `-f` to choose the file you want to use.
 
