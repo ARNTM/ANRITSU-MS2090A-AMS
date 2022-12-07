@@ -3,15 +3,14 @@ import time
 import pandas as pd
 import signal
 import sys
-from functions.configManager import loadConfig
+from functions.configManager import setup
 from functions.configManager import saveConfig
 
 def main():
     opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
+    optsWOArgs = [arg for arg in sys.argv[1:] if arg.startswith("--")]
     args = [arg for arg in sys.argv[1:] if not arg.startswith("-")]
-
-    config, file = loadConfig(opts, args)
-
+    
     def handler(signo, stack_frame):
         res = input("Ctrl-C was pressed. Do you really want to exit? [y/n]: ")
         if res == 'y':
@@ -21,52 +20,27 @@ def main():
             rm.close()
             sys.exit(0)
 
-
     signal.signal(signal.SIGINT, handler)
 
-    unitsAvailable = ['Hz', 'kHz', 'MHz', 'GHz']
-    yesno = ['yes', 'no']
-    unitsStr = ', '.join([str(elem) for elem in unitsAvailable])
-    freqUnits = ''
-    spanUnits = ''
-    integrationBandwidthUnits = ''
-    sweepContinuously = ''
-    preAmp = ''
-    ip = str(input(f"Enter IP address [{config['IP_from_config']}]: ") or config['IP_from_config'])
-    port = str(input(f"Enter port number [{config['PORT_from_config']}]: ") or config['PORT_from_config'])
-    centralFreq = str(input(f"Enter central frequency [{config['CENTRAL_FREQ_from_config']}]: ") or config['CENTRAL_FREQ_from_config'])
-    while freqUnits not in unitsAvailable:
-        freqUnits = str(input(f"Enter frequency units ({unitsStr}) [{config['FREQ_UNITS_from_config']}]: ") or config['FREQ_UNITS_from_config'])
-    span = str(input(f"Enter span [{config['SPAN_from_config']}]: ") or config['SPAN_from_config'])
-    while spanUnits not in unitsAvailable:
-        spanUnits = str(input(f"Enter frequency units ({unitsStr}) [{config['SPAN_UNITS_from_config']}]: ") or config['SPAN_UNITS_from_config'])
-    sweepPoints = str(input(f"Enter number of sweep points [{config['SWEEP_POINTS_from_config']}]: ") or config['SWEEP_POINTS_from_config'])
-    integrationBandwidth = str(input(f"Enter integration bandwidth [{config['INTEGRATION_BANDWIDTH_from_config']}]: ") or config['INTEGRATION_BANDWIDTH_from_config'])
-    while integrationBandwidthUnits not in unitsAvailable:
-        integrationBandwidthUnits = str(input(f"Enter integration bandwidth units ({unitsStr}) [{config['INTEGRATION_BANDWIDTH_UNITS_from_config']}]: ") or config['INTEGRATION_BANDWIDTH_UNITS_from_config'])
-    sweepTime = str(input(f"Enter sweep time [{config['SWEEP_TIME_from_config']}]: ") or config['SWEEP_TIME_from_config'])
-    while sweepContinuously not in yesno:
-        sweepContinuously = str(input(f"Sweep continuously? [{config['SWEEP_CONTINUOUSLY_from_config']}]: ") or config['SWEEP_CONTINUOUSLY_from_config'])
-    while preAmp not in yesno:
-        preAmp = str(input(f"Enable pre-amp? [{config['PRE_AMP_from_config']}]: ") or config['PRE_AMP_from_config'])
-
+    ip, port, centralFreq, freqUnits, span, spanUnits, sweepPoints, integrationBandwidth, integrationBandwidthUnits, sweepTime, sweepContinuously, preAmp, file = setup(opts, optsWOArgs, args)
+    
     try:
         rm = pyvisa.ResourceManager()
         anritsu = rm.open_resource(f'TCPIP0::{ip}::{port}::SOCKET')
         anritsu.read_termination = '\n'
         anritsu.write_termination = '\n'
-        print("Conected to: " + anritsu.query("*IDN?"))
+        print("\n\n [✓] Conected to: " + anritsu.query("*IDN?"))
 
     except:
-        print("######################\nError while connecting to instrument\n######################")
+        print("\n\n[x] Error while connecting to instrument")
         sys.exit(1)
 
-    print("######################\nSetting up instrument...\n######################")
+    print("\n\n[✓] Setting up instrument...")
     try:
         anritsu.write(f'FREQ:SPAN {span}{spanUnits}')
-        print("Instrument span set to: " + anritsu.query('FREQ:SPAN?'))
+        print("- Instrument span set to: " + anritsu.query('FREQ:SPAN?'))
         anritsu.write(f'FREQ:CENT {centralFreq}{freqUnits}')
-        print("Instrument central frequency set to: " + anritsu.query('FREQ:CENT?'))
+        print("- Instrument central frequency set to: " + anritsu.query('FREQ:CENT?'))
         anritsu.write(f'DISP:WIND:TRAC:Y:SCAL:RLEV -30')
         anritsu.write(f'CONFigure:CHPower')
         anritsu.write(f'TRACe1:TYPE AVER')
@@ -74,37 +48,24 @@ def main():
             anritsu.write(f'POWer:RF:GAIN:STATe ON')
         else:
             anritsu.write(f'POWer:RF:GAIN:STATe OFF')
-        print("Instrument pre-amp set to: " + anritsu.query('POWer:RF:GAIN:STATe?'))
+        print("- Instrument pre-amp set to: " + anritsu.query('POWer:RF:GAIN:STATe?'))
         anritsu.write(f'CHPower:BWIDth:INTegration {integrationBandwidth}{integrationBandwidthUnits}')
-        print("Instrument integration bandwidth set to: " + anritsu.query('CHPower:BWIDth:INTegration?'))
+        print("- Instrument integration bandwidth set to: " + anritsu.query('CHPower:BWIDth:INTegration?'))
         if (sweepContinuously == 'yes'):
             anritsu.write(f'INIT:CONT ON')
         else:
             anritsu.write(f'INIT:CONT OFF')
-        print("Instrument sweep continuously set to: " + anritsu.query('INIT:CONT?'))
+        print("- Instrument sweep continuously set to: " + anritsu.query('INIT:CONT?'))
         anritsu.write(f'DISPlay:POINtcount {sweepPoints}')
-        print("Instrument sweep points set to: " + anritsu.query('DISPlay:POINtcount?'))
+        print("- Instrument sweep points set to: " + anritsu.query('DISPlay:POINtcount?'))
 
-        print("######################\nSetup succesfull\n######################")
+        print("\n\n [✓] Setup succesfull")
 
-        config = {}
-        config['IP'] = ip
-        config['PORT'] = port
-        config['CENTRAL_FREQ'] = centralFreq
-        config['FREQ_UNITS'] = freqUnits
-        config['SPAN'] = span
-        config['SPAN_UNITS'] = spanUnits
-        config['SWEEP_POINTS'] = sweepPoints
-        config['INTEGRATION_BANDWIDTH'] = integrationBandwidth
-        config['INTEGRATION_BANDWIDTH_UNITS'] = integrationBandwidthUnits
-        config['SWEEP_TIME'] = sweepTime
-        config['SWEEP_CONTINUOUSLY'] = sweepContinuously
-        config['PRE_AMP'] = preAmp
-        saveConfig(config, file)
+        saveConfig(ip, port, centralFreq, freqUnits, span, spanUnits, sweepPoints, integrationBandwidth, integrationBandwidthUnits, sweepTime, sweepContinuously, preAmp, file)
 
 
     except:
-        print("Error while setting up instrument")
+        print("\n\n[x] Error while setting up instrument")
         sys.exit(1)
 
 
@@ -123,11 +84,10 @@ def main():
             satellites = gpsSplit[5]
             return [power, status, dateTime, latitude, longitude, altitude, satellites]
 
-
     while True:
         option = input("1 - Start continuous measures\n2 - Single Measure\n3 - Exit\n")
         if option == '1':
-            print("######################\nStarting continuous measures\n######################")
+            print("\n\n[✓] Starting continuous measures")
             data = []
             while True:
                 [power, status, dateTime, latitude, longitude, altitude, satellites] = measure()
@@ -141,7 +101,7 @@ def main():
                 time.sleep(float(sweepTime))
         if option == '2':
             [power, status, dateTime, latitude, longitude, altitude, satellites] = measure()
-            print(f'Successful measure: Power: {power}, Datetime: {dateTime}, GPS Status: {status}')
+            print(f'\n\n[✓] Successful measure: Power: {power}, Datetime: {dateTime}, GPS Status: {status}')
         if option == '3':
             anritsu.close()
             rm.close()
