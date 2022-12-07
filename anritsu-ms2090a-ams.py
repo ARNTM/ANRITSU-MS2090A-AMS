@@ -5,12 +5,10 @@ import signal
 import sys
 from functions.configManager import setup
 from functions.configManager import saveConfig
+from functions.flags import flags
 
 def main():
-    opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
-    optsWOArgs = [arg for arg in sys.argv[1:] if arg.startswith("--")]
-    args = [arg for arg in sys.argv[1:] if not arg.startswith("-")]
-    
+    flags()
     def handler(signo, stack_frame):
         res = input("Ctrl-C was pressed. Do you really want to exit? [y/n]: ")
         if res == 'y':
@@ -22,7 +20,7 @@ def main():
 
     signal.signal(signal.SIGINT, handler)
 
-    ip, port, centralFreq, freqUnits, span, spanUnits, sweepPoints, integrationBandwidth, integrationBandwidthUnits, sweepTime, sweepContinuously, preAmp, file = setup(opts, optsWOArgs, args)
+    ip, port, centralFreq, freqUnits, span, spanUnits, sweepPoints, integrationBandwidth, integrationBandwidthUnits, sweepTime, sweepContinuously, preAmp, file = setup()
     
     try:
         rm = pyvisa.ResourceManager()

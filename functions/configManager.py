@@ -2,7 +2,10 @@ import sys
 import os
 import json
 
-def setup(opts, optsWOArgs, args):
+def setup():
+    opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
+    optsWOArgs = [arg for arg in sys.argv[1:] if arg.startswith("--")]
+    args = [arg for arg in sys.argv[1:] if not arg.startswith("-")]
     config, file = loadConfig(opts, args)
     unitsAvailable = ['Hz', 'kHz', 'MHz', 'GHz']
     yesno = ['yes', 'no']
@@ -75,7 +78,7 @@ def loadConfig(opts, args):
         pass
     else:
         os.mkdir('data/')
-        
+
     if os.path.exists(config_file):
         with open(config_file, "r") as f:
             config = json.load(f)
